@@ -191,10 +191,10 @@ class BAC_Nav_Widget extends \Elementor\Widget_Base {
                       <i class="fa-solid fa-gauge" aria-hidden="true"></i>
                     </button>
                     <div class="bac-nav-popover" id="bac-nav-user-menu" hidden>
-                      <a class="bac-nav-popover-link" href="<?php echo esc_url(admin_url('/')); ?>">
+                      <a class="bac-nav-popover-link" href="<?php echo esc_url(bac_path('dashboard')); ?>">
                         <i class="fa-solid fa-gauge" aria-hidden="true"></i> Dashboard
                       </a>
-                      <a class="bac-nav-popover-link" href="<?php echo esc_url(home_url('/dashboard/')); ?>">
+                      <a class="bac-nav-popover-link" href="<?php echo esc_url(bac_path('affiliate')); ?>">
                         <i class="fa-solid fa-handshake" aria-hidden="true"></i> Affiliate Dashboard
                       </a>
                     </div>

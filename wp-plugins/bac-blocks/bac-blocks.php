@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       BAC Blocks
  * Description:        Custom Elementor widgets for the Branded Apparel Club site (header/nav, hero, stats, card grid). Client-editable, no code required.
- * Version:           0.9.15
+ * Version:           0.9.16
  * Author:            ENVSN Studios
  * Requires Plugins:  elementor
  * Text Domain:       bac-blocks
@@ -16,7 +16,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('BAC_BLOCKS_VER', '0.9.15');
+define('BAC_BLOCKS_VER', '0.9.16');
 define('BAC_BLOCKS_PATH', plugin_dir_path(__FILE__));
 define('BAC_BLOCKS_URL', plugin_dir_url(__FILE__));
 
@@ -24,6 +24,7 @@ define('BAC_BLOCKS_URL', plugin_dir_url(__FILE__));
  * Self-updater: check the GitHub repo's latest Release and let WordPress update
  * this plugin from it. Loads independently of Elementor so updates always work.
  */
+require_once BAC_BLOCKS_PATH . 'includes/class-bac-paths.php';
 require_once BAC_BLOCKS_PATH . 'includes/class-bac-github-updater.php';
 new ENVSN_GitHub_Updater(__FILE__, [
     'slug'       => 'bac-blocks',
@@ -31,7 +32,7 @@ new ENVSN_GitHub_Updater(__FILE__, [
     'repo'       => 'envsnstudios',
     'version'    => BAC_BLOCKS_VER,
     'asset'      => 'bac-blocks.zip',
-    'tag_prefix' => 'bac-blocks-', // monorepo: release tags like bac-blocks-0.9.15
+    'tag_prefix' => 'bac-blocks-', // monorepo: release tags like bac-blocks-0.9.16
 ]);
 
 /**
@@ -258,7 +259,7 @@ function bac_render_modals() {
           </div>
           <button type="button" class="bac-modal-close" data-bac-close aria-label="Close login form">&times;</button>
         </div>
-        <form class="bac-modal-form" method="post" action="<?php echo esc_url(wp_login_url()); ?>">
+        <form class="bac-modal-form" method="post" action="<?php echo esc_url(bac_path('login_action')); ?>">
           <div class="bac-field">
             <label for="bac-login-user">Email or Username</label>
             <input type="text" id="bac-login-user" name="log" autocomplete="username" required>
@@ -269,11 +270,11 @@ function bac_render_modals() {
           </div>
           <div class="bac-modal-meta">
             <label class="bac-modal-check"><input type="checkbox" name="rememberme" value="forever"> Remember me</label>
-            <a href="<?php echo esc_url(wp_lostpassword_url()); ?>">Forgot password?</a>
+            <a href="<?php echo esc_url(bac_path('forgot')); ?>">Forgot password?</a>
           </div>
           <button type="submit" class="bac-btn bac-btn-primary">Log In</button>
         </form>
-        <p class="bac-modal-alt">Not a member yet? <a href="/membership-registration/">Join the Club</a></p>
+        <p class="bac-modal-alt">Not a member yet? <a href="<?php echo esc_url(bac_path('register')); ?>">Join the Club</a></p>
       </div>
     </dialog>
 
