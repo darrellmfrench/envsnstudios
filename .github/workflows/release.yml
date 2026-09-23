@@ -1,0 +1,44 @@
+name: Package plugin on release
+
+# Monorepo release convention:
+#   Tag each release  <plugin-folder>-<version>   e.g.  bac-blocks-0.9.16
+#   The version must match that plugin's header + version constant.
+# This workflow reads the tag, zips the matching plugin folder, and attaches
+# <plugin-folder>.zip to the release so sites can self-update.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve plugin folder from tag
+        id: slug
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          SLUG="$(printf '%s' "$TAG" | sed -E 's/-v?[0-9]+\.[0-9]+\.[0-9]+.*$//')"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          if [ -z "$SLUG" ] || [ ! -d "$SLUG" ]; then
+            echo "::error::No plugin folder '$SLUG' for tag '$TAG'. Use <plugin-folder>-<version>, e.g. bac-blocks-0.9.16"
+            exit 1
+          fi
+
+      - name: Build ${{ steps.slug.outputs.slug }}.zip
+        run: |
+          SLUG="${{ steps.slug.outputs.slug }}"
+          mkdir -p dist
+          rsync -a --exclude '.DS_Store' "$SLUG/" "dist/$SLUG/"
+          cd dist && zip -rq "../$SLUG.zip" "$SLUG"
+
+      - name: Attach zip to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.slug.outputs.slug }}.zip
