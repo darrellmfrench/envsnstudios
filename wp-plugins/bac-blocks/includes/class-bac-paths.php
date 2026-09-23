@@ -52,6 +52,24 @@ add_action('admin_menu', function () {
     );
 });
 
+/** Add a "Settings" link on the plugin's row (Plugins screen) for quick access. */
+add_filter('plugin_action_links_bac-blocks/bac-blocks.php', function ($links) {
+    $url = admin_url('options-general.php?page=bac-blocks-paths');
+    array_unshift($links, '<a href="' . esc_url($url) . '">Settings</a>');
+    return $links;
+});
+
+/** Admin-bar shortcut so the paths are one click from any page. */
+add_action('admin_bar_menu', function ($bar) {
+    if (! current_user_can('manage_options')) { return; }
+    $bar->add_node([
+        'id'    => 'bac-blocks-paths',
+        'title' => 'BAC Paths',
+        'href'  => admin_url('options-general.php?page=bac-blocks-paths'),
+        'meta'  => ['title' => 'Edit BAC Blocks login / account paths'],
+    ]);
+}, 100);
+
 add_action('admin_init', function () {
     register_setting('bac_blocks_paths_group', 'bac_blocks_paths', [
         'type'              => 'array',
