@@ -44,6 +44,7 @@ class ENVSN_GitHub_Updater {
     private $tag_prefix;
     private $cache_key;
     private $cache_ttl;
+    private static $notice_hooked = false;
 
     public function __construct($file, array $args) {
         $this->file       = $file;
@@ -56,12 +57,49 @@ class ENVSN_GitHub_Updater {
         $this->tag_prefix = isset($args['tag_prefix']) ? $args['tag_prefix'] : '';
         // Cache the release LIST once per repo — shared by every plugin in it.
         $this->cache_key  = 'bac_gh_rels_' . md5($this->owner . '/' . $this->repo);
-        $this->cache_ttl  = 6 * HOUR_IN_SECONDS;
+        $this->cache_ttl  = 1 * HOUR_IN_SECONDS;
 
         add_filter('pre_set_site_transient_update_plugins', [$this, 'check_update']);
         add_filter('plugins_api', [$this, 'plugin_info'], 20, 3);
         add_filter('upgrader_source_selection', [$this, 'fix_source_dir'], 10, 4);
         add_action('upgrader_process_complete', [$this, 'clear_cache'], 10, 0);
+
+        // "Check for updates" link on the plugin row + its handler.
+        add_filter('plugin_action_links_' . $this->basename, [$this, 'row_link']);
+        add_action('admin_init', [$this, 'maybe_force_check']);
+        if (! self::$notice_hooked) {
+            self::$notice_hooked = true;
+            add_action('admin_notices', [__CLASS__, 'checked_notice']);
+        }
+    }
+
+    /** Append a "Check for updates" link to this plugin's row. */
+    public function row_link($links) {
+        $url = wp_nonce_url(
+            add_query_arg('bac_gh_check', $this->slug, admin_url('plugins.php')),
+            'bac_gh_check_' . $this->slug
+        );
+        $links[] = '<a href="' . esc_url($url) . '">Check for updates</a>';
+        return $links;
+    }
+
+    /** Clear the cache + WordPress's update list, then re-check immediately. */
+    public function maybe_force_check() {
+        if (empty($_GET['bac_gh_check']) || $_GET['bac_gh_check'] !== $this->slug) { return; }
+        if (! current_user_can('update_plugins')) { return; }
+        check_admin_referer('bac_gh_check_' . $this->slug);
+
+        delete_transient($this->cache_key);        // drop our cached release list
+        delete_site_transient('update_plugins');   // force WordPress to rebuild its update list
+
+        wp_safe_redirect(add_query_arg('bac_gh_checked', '1', admin_url('plugins.php')));
+        exit;
+    }
+
+    /** One-time success notice after a manual check. */
+    public static function checked_notice() {
+        if (empty($_GET['bac_gh_checked'])) { return; }
+        echo '<div class="notice notice-success is-dismissible"><p>Checked GitHub for plugin updates. Any available update now shows below.</p></div>';
     }
 
     /** Fetch + cache the repo's releases list (one API call serves all plugins). */

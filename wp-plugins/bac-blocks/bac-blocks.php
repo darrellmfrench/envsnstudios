@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       BAC Blocks
  * Description:        Custom Elementor widgets for the Branded Apparel Club site (header/nav, hero, stats, card grid). Client-editable, no code required.
- * Version:           0.9.17
+ * Version:           0.9.18
  * Author:            ENVSN Studios
  * Requires Plugins:  elementor
  * Text Domain:       bac-blocks
@@ -16,7 +16,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('BAC_BLOCKS_VER', '0.9.17');
+define('BAC_BLOCKS_VER', '0.9.18');
 define('BAC_BLOCKS_PATH', plugin_dir_path(__FILE__));
 define('BAC_BLOCKS_URL', plugin_dir_url(__FILE__));
 
@@ -32,7 +32,7 @@ new ENVSN_GitHub_Updater(__FILE__, [
     'repo'       => 'envsnstudios',
     'version'    => BAC_BLOCKS_VER,
     'asset'      => 'bac-blocks.zip',
-    'tag_prefix' => 'bac-blocks-', // monorepo: release tags like bac-blocks-0.9.17
+    'tag_prefix' => 'bac-blocks-', // monorepo: release tags like bac-blocks-0.9.18
 ]);
 
 /**
